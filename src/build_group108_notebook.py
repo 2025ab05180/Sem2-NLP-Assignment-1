@@ -53,7 +53,7 @@ cells = [
 
         Coverage map:
 
-        - Part 1: Data loading, EDA, vocabulary/OOV handling, sentence padding, and deterministic test split.
+        - Part 1: Data loading, EDA, vocabulary/OOV handling, sentence padding, and full-fiction test setup.
         - Part 2: Explicit transition matrix, emission matrix, OOV mechanism, and Viterbi decoder from scratch.
         - Part 3: Inference on 2 training and 2 test sentences, 3 error-analysis examples, token accuracy, and top-5 POS confusion matrix.
         - Part D: Pre-trained baseline comparison and discussion.
@@ -270,37 +270,29 @@ cells = [
     ),
     md(
         """
-        ### Sentence Padding and Test Split
+        ### Sentence Padding and Test Setup
 
         Sentence boundaries are represented through special POS states `<START>` and `<END>`. This allows the transition matrix to learn which tags commonly start and end a sentence.
 
-        The assignment specifies `news` for training and `fiction` for testing, and also asks for evaluation on the entire 20 percent test set. Therefore, this notebook trains on all `news` sentences and uses a deterministic 20 percent sample of `fiction` as the final evaluation test set.
+        The assignment specifies `news` for training and `fiction` for testing. Following the Dataset specification, this notebook trains on all `news` sentences and evaluates on the entire `fiction` corpus as the final test set.
         """
     ),
     code(
         r"""
         START_TAG = "<START>"
         END_TAG = "<END>"
-        TEST_FRACTION = 0.20
 
         def padded_tags(sentence):
             return [START_TAG] + [tag for _, tag in sentence] + [END_TAG]
 
-        rng = random.Random(SEED)
-        fiction_indices = list(range(len(raw_fiction_sents)))
-        rng.shuffle(fiction_indices)
-        final_test_size = max(1, int(round(TEST_FRACTION * len(raw_fiction_sents))))
-        final_test_indices = sorted(fiction_indices[:final_test_size])
-        heldout_test_sents = [raw_fiction_sents[index] for index in final_test_indices]
-        remaining_fiction_sents = [raw_fiction_sents[index] for index in sorted(fiction_indices[final_test_size:])]
+        heldout_test_sents = raw_fiction_sents
 
         split_summary = pd.DataFrame(
             [
                 ["HMM training category", TRAIN_CATEGORY],
                 ["HMM training sentences", len(raw_train_sents)],
                 ["External test category", TEST_CATEGORY],
-                ["Final 20 percent fiction test sentences", len(heldout_test_sents)],
-                ["Remaining fiction sentences reserved for exploration", len(remaining_fiction_sents)],
+                ["Final fiction test sentences", len(heldout_test_sents)],
             ],
             columns=["Item", "Value"],
         )
@@ -575,9 +567,9 @@ cells = [
     ),
     md(
         """
-        ## Part 3c: Full Evaluation on the 20 Percent Fiction Test Set
+        ## Part 3c: Full Evaluation on the Fiction Test Set
 
-        Token-level accuracy is computed over the final 20 percent fiction test set. Sentence padding states are not included in evaluation.
+        Token-level accuracy is computed over the entire `fiction` test corpus. Sentence padding states are not included in evaluation.
         """
     ),
     code(
@@ -599,7 +591,7 @@ cells = [
 
         hmm_accuracy, hmm_correct, hmm_total, hmm_gold, hmm_predicted = evaluate_hmm(heldout_test_sents)
 
-        print(f"HMM token-level accuracy on final 20 percent fiction test set: {hmm_accuracy:.4%}")
+        print(f"HMM token-level accuracy on full fiction test set: {hmm_accuracy:.4%}")
         print(f"Correct tokens: {hmm_correct:,} / {hmm_total:,}")
 
         top5_test_tags = [tag for tag, _ in Counter(hmm_gold).most_common(5)]

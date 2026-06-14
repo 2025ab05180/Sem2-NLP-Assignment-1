@@ -43,7 +43,7 @@ The notebook downloads required NLTK resources automatically when needed.
 - From-scratch Viterbi decoder using log probabilities.
 - Inference output for 2 training and 2 test sentences.
 - Three misclassified sentence examples with brief error analysis.
-- Token-level HMM accuracy on the 20 percent fiction test set.
+- Token-level HMM accuracy on the full fiction test set.
 - Confusion matrix for the top 5 POS tags.
 - Pre-trained baseline comparison using NLTK's PerceptronTagger.
 - Markdown discussion explaining HMM limitations versus baseline strengths.
